@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * APC Administration Interface
  */
 
@@ -11,32 +12,82 @@ function apc_admin_settings_form($form, &$form_state) {
 
   $form = array();
 
-  if(!function_exists('apc_cache_info') || !(@apc_cache_info('opcode'))) {
+  // Add css for admininstration
+  drupal_add_css(drupal_get_path('module', 'apc_admin') . '/apc_admin.css');
+
+  // Check if APC enabled at all
+  if (!function_exists('apc_cache_info') || !(@apc_cache_info('opcode'))) {
     return array('#prefix' => t('No cache info available.  APC does not appear to be running.'));
   }
 
-  drupal_add_css(drupal_get_path('module', 'apc_admin') . '/apc_admin.css');
+  // Check if we have library installed
+  $secret_key = variable_get('apc_admin_secret_key');
+  if (!$secret_key) {
+
+    $form['apc_secret_key'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Generate Secret Key'),
+    );
+
+    $form['apc_secret_key']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Generate secret key'),
+      '#submit' => array('apc_admin_generate_secret_key'),
+    );
+
+    return $form;
+  }
+
+  // Check if we have library on path
+  $apc_php_path = libraries_get_path('apc_admin') . '/' . $secret_key . '/apc.php';
+  if (!is_file($apc_php_path)) {
+    $profile = drupal_get_path('profile', drupal_get_profile());
+    $config = conf_path();
+
+    // Possible lib paths
+    $lib_paths = array(
+      'libraries',
+      "$profile/libraries",
+      'sites/all/libraries',
+      "$config/libraries",
+    );
+
+    $path_in_libraries = 'apc_admin' . '/' . $secret_key . '/apc.php';
+
+    foreach ($lib_paths AS $lib_path) {
+      $example_lib_paths[] = $lib_path . '/' . $path_in_libraries;
+    }
+
+    drupal_set_message(
+      t('You should place apc.php to your library directory, so the path to file would look like (choose any): !example_lib_paths',
+        array(
+          '!example_lib_paths' => theme('item_list', array('items' => $example_lib_paths))
+        )
+      ),
+      'warning'
+    );
+    return $form;
+  }
 
   // Node author information for administrators.
   $form['apc_reset_cache'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer nodes'),
     '#title' => t('Reset APC Cache'),
   );
 
   $form['apc_reset_cache']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Reset Cache'),
+    '#submit' => array('apc_admin_reset_cache'),
   );
 
   $form['apc_php'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer nodes'),
     '#title' => t('APC Administration'),
   );
 
   $form['apc_php']['apc_php_iframe'] = array(
-    '#markup' => '<iframe src="' . $base_url . '/' . drupal_get_path('module', 'apc_admin') . '/' . 'apc.php"></iframe>',
+    '#markup' => '<iframe src="' . $base_url . '/' . $apc_php_path . '"></iframe>',
   );
 
   return $form;
@@ -45,9 +96,19 @@ function apc_admin_settings_form($form, &$form_state) {
 /**
  * Handle cache reset
  */
-function apc_admin_settings_form_submit($form, &$form_state) {
+function apc_admin_reset_cache($form, &$form_state) {
   apc_clear_cache();
   apc_clear_cache('user');
   apc_clear_cache('opcode');
   drupal_set_message(t('APC Cache cleared!'));
+}
+
+/**
+ * Handle cache reset
+ */
+function apc_admin_generate_secret_key($form, &$form_state) {
+  // Generate and save our short secret key
+  $secret_key = drupal_strtolower(drupal_substr(drupal_hash_base64(drupal_substr(md5(microtime()), rand(0, 26), 5)), 0, 10));
+  variable_set('apc_admin_secret_key', $secret_key);
+  drupal_set_message(t('Secret key generated. Your secret key is @secret_key', array('@secret_key' => $secret_key)));
 }
