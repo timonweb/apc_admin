@@ -17,7 +17,13 @@ function apc_admin_settings_form($form, &$form_state) {
 
   // Check if APC enabled at all
   if (!function_exists('apc_cache_info') || !(@apc_cache_info('opcode'))) {
-    return array('#prefix' => t('No cache info available.  APC does not appear to be running. Enable it in your php.ini and comeback here.'));
+    
+    $form['message'] = array(
+      '#markup' => t('No cache info available.  APC does not appear to be running. Enable it in your php.ini and comeback here.')
+    );
+
+    return $form;
+
   }
 
   // Check if we have library installed
