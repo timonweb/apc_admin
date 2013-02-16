@@ -10,7 +10,7 @@ INTRODUCTION
 ------------
 Maintainer: Tim Kamanin (http://drupal.org/user/49393)
 
-Administrate APC from Drupal administration interface. Embeds apc.php administrative interface into Drupal admin.
+Manage APC from Drupal administration interface. This module embeds default APC administrative interface (apc.php file) into Drupal admin.
 
 INSTALLATION
 ------------

@@ -1,5 +1,5 @@
 name = APC Admin
-description = Administrate APC from Drupal administration interface
+description = Manage APC from Drupal administration interface
 package = Performance
 core = 7.x
 files[] = apc_admin.module
