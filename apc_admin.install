@@ -1,0 +1,18 @@
+<?php
+/**
+* @file
+**/
+
+/**
+ * Implementation of hook_install().
+ */
+function apc_admin_install() {
+
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function apc_admin_uninstall() {
+  variable_del('apc_admin_secret_key');
+}

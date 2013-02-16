@@ -108,7 +108,8 @@ function apc_admin_reset_cache($form, &$form_state) {
  */
 function apc_admin_generate_secret_key($form, &$form_state) {
   // Generate and save our short secret key
-  $secret_key = drupal_strtolower(drupal_substr(drupal_hash_base64(drupal_substr(md5(microtime()), rand(0, 26), 5)), 0, 10));
+  global $drupal_hash_salt;
+  $secret_key = substr(md5($drupal_hash_salt . time()), 1, 12);
   variable_set('apc_admin_secret_key', $secret_key);
   drupal_set_message(t('Secret key generated. Your secret key is @secret_key', array('@secret_key' => $secret_key)));
 }
