@@ -1,17 +1,18 @@
 <?php
 /**
-* @file
-**/
+ * @file
+ * APC Admin Install / Uninstall hooks.
+ */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function apc_admin_install() {
 
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function apc_admin_uninstall() {
   variable_del('apc_admin_secret_key');

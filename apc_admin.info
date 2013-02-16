@@ -3,4 +3,5 @@ description = Administrate APC from Drupal administration interface
 package = Performance
 core = 7.x
 files[] = apc_admin.module
+dependencies[] = libraries
 configure = admin/config/development/performance/apc_admin
